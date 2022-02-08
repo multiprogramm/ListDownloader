@@ -104,7 +104,8 @@ namespace ListDownloader
 		/// </summary>
 		void DownloadSafe()
 		{
-			WebRequest request = WebRequest.Create( mInfo.mUrl );
+			string url = new Uri( mInfo.mUrl ).AbsoluteUri;
+			WebRequest request = WebRequest.Create( url );
 			using( WebResponse response = request.GetResponse() )
 			{
 				string filePathAfterLoad = ResultPathCalc( response );
