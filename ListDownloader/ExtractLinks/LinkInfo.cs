@@ -73,7 +73,7 @@ namespace ListDownloader
 						string lastPath = pathParts.Last();
 						int dot = lastPath.LastIndexOf( '.' );
 						if( dot >= 0 && dot < lastPath.Count() - 1 )
-							info.mCaption = lastPath.Substring( dot );
+							info.mCaption = lastPath.Substring( 0, dot );
 					}
 					
 					if( string.IsNullOrEmpty( info.mCaption ) )
