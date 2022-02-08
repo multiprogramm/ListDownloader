@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace ListDownloader
 {
@@ -17,6 +18,11 @@ namespace ListDownloader
 			int result = 0;
 			try
 			{
+				ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3
+					| SecurityProtocolType.Tls
+					| SecurityProtocolType.Tls11
+					| SecurityProtocolType.Tls12;
+
 				Options options = new Options( args );
 				Worker worker = new Worker( options );
 				worker.Run();
