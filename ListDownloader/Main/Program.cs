@@ -49,7 +49,8 @@ namespace ListDownloader
 
 				downloader.Run();
 
-				Console.ReadKey();
+				if( options.IsReadKey )
+					Console.ReadKey();
 			}
 			catch( LogicError error )
 			{

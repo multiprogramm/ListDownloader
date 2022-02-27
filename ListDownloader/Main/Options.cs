@@ -54,6 +54,10 @@ namespace ListDownloader
 		public bool IsDeleteDownloadedLinks { get; private set; } = false;
 		static readonly private string KEY_DELETE_DOWNLOADED_LINKS = "-deletelinks";
 
+		// Удалять ли ссылки из файла-списка после скачки
+		public bool IsReadKey { get; private set; } = true;
+		static readonly private string KEY_NO_READ_KEY = "-noreadkey";
+
 		static readonly private string[] KEYS_HELP = new string[] { "-help", "/help", "/?" };
 
 		/// <summary>
@@ -123,6 +127,10 @@ namespace ListDownloader
 			Console.WriteLine( "    Удалять из списка файлов линки и имена файлов после их скачки." );
 			Console.WriteLine( "    По умолчанию выключено." );
 
+			Console.WriteLine( "  " + KEY_NO_READ_KEY );
+			Console.WriteLine( "    Не ждать в конце ввод символа." );
+			Console.WriteLine( "    По умолчанию ждётся." );
+
 			Console.WriteLine( "  " + KEYS_HELP[0] );
 			Console.WriteLine( "    Справка по параметрам." );
 		}
@@ -169,6 +177,10 @@ namespace ListDownloader
 			else if( s_key == KEY_DELETE_DOWNLOADED_LINKS )
 			{
 				IsDeleteDownloadedLinks = true;
+			}
+			else if( s_key == KEY_NO_READ_KEY )
+			{
+				IsReadKey = false;
 			}
 			else
 			{
