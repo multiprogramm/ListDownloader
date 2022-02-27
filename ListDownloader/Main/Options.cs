@@ -50,6 +50,10 @@ namespace ListDownloader
 		public bool IsNumerateFiles { get; private set; } = false;
 		static readonly private string KEY_NUMERATE_FILES = "-num";
 
+		// Удалять ли ссылки из файла-списка после скачки
+		public bool IsDeleteDownloadedLinks { get; private set; } = false;
+		static readonly private string KEY_DELETE_DOWNLOADED_LINKS = "-deletelinks";
+
 		static readonly private string[] KEYS_HELP = new string[] { "-help", "/help", "/?" };
 
 		/// <summary>
@@ -115,6 +119,10 @@ namespace ListDownloader
 			Console.WriteLine( "    Папка, в которую будут сохраняться файлы." );
 			Console.WriteLine( "    По умолчанию - папка рядом с файлом со ссылками, с таким же именем." );
 
+			Console.WriteLine( "  " + KEY_DELETE_DOWNLOADED_LINKS );
+			Console.WriteLine( "    Удалять из списка файлов линки и имена файлов после их скачки." );
+			Console.WriteLine( "    По умолчанию выключено." );
+
 			Console.WriteLine( "  " + KEYS_HELP[0] );
 			Console.WriteLine( "    Справка по параметрам." );
 		}
@@ -157,6 +165,10 @@ namespace ListDownloader
 			else if( s_key == KEY_FOLDER_PATH )
 			{
 				FolderPath = args[i++];
+			}
+			else if( s_key == KEY_DELETE_DOWNLOADED_LINKS )
+			{
+				IsDeleteDownloadedLinks = true;
 			}
 			else
 			{

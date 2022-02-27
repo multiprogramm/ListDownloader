@@ -148,5 +148,53 @@ namespace ListDownloader
 				return sb.ToString();
 			}
 		}
+
+		public static string GetFreeFileName( string folder_path, string base_file_name, string postfix_format )
+		{
+			string path = Path.Combine( folder_path, base_file_name );
+			if( !File.Exists( path ) )
+				return path;
+			string name = Path.GetFileNameWithoutExtension( base_file_name );
+			string ext = Path.GetExtension( base_file_name );
+
+			for( int i = 2; i != int.MaxValue; ++i )
+			{
+				path = Path.Combine( folder_path, name + string.Format( postfix_format, i ) + ext );
+				if( !File.Exists( path ) )
+					return path;
+			}
+
+			throw new Exception( "No free file name" );
+		}
+
+		/// <summary>
+		/// Удалить из файла строчки с line_from по line_to включительно
+		/// </summary>
+		public static void RemoveLinesFromFile( string file_path, Encoding encoding, int line_from, int line_to )
+		{
+			if( line_from > line_to )
+				return;
+			string new_file = GetFreeFileName( Path.GetDirectoryName( file_path ), Path.GetFileName( ExtReplace( file_path, ".new" ) ), " ({0})" );
+			using( StreamReader reader = new StreamReader( file_path, encoding ) )
+			using( StreamWriter writer = new StreamWriter( new_file, false, encoding ) )
+			{
+				for( int line_num = 0; !reader.EndOfStream; ++line_num )
+				{
+					string line = reader.ReadLine();
+					if( line_num < line_from || line_num > line_to )
+						writer.WriteLine( line );
+				}
+			}
+
+			// Переименовываем старый файл
+			string old_file = GetFreeFileName( Path.GetDirectoryName( file_path ), Path.GetFileName( ExtReplace( file_path, ".old" ) ), " ({0})" );
+			File.Move( file_path, old_file );
+
+			// На его место кладём наш новый файл
+			File.Move( new_file, file_path );
+
+			// Теперь спокойно удаляем старый файл
+			File.Delete( old_file );
+		}
 	}
 }

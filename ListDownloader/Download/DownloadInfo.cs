@@ -42,6 +42,9 @@ namespace ListDownloader
 		// Нужно ли добавить номер закачки в имя файла
 		public bool mIsNumerate { get; set; } = false;
 
+		// Любые дополнительные данные, связанные с закачкой
+		public object mExtraData { get; set; } = null;
+
 		// Путь к файлу (без номера), получается через GetFilePath()
 		// а вот там уже добавится номер, если нужно
 		string mFilePath { get; set; }

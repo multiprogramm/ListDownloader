@@ -63,11 +63,10 @@
     <Compile Include="Console\PaintedConsoleString.cs" />
     <Compile Include="Download\Downloader.cs" />
     <Compile Include="Download\DownloadInfo.cs" />
-    <Compile Include="ExtractLinks\LinkInfo.cs" />
-    <Compile Include="ExtractLinks\M3UListExtractor.cs" />
-    <Compile Include="ExtractLinks\TxtListLinksExtractor.cs" />
+    <Compile Include="ListLinksFormat\LinkInfo.cs" />
+    <Compile Include="ListLinksFormat\M3UListLinksFormat.cs" />
+    <Compile Include="ListLinksFormat\TxtListLinksFormat.cs" />
     <Compile Include="Tools\Helpers.cs" />
-    <Compile Include="Main\Worker.cs" />
     <Compile Include="Main\Options.cs" />
     <Compile Include="Download\ParallelDownloader.cs" />
     <Compile Include="Main\Program.cs" />

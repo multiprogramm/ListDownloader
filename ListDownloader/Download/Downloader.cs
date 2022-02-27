@@ -15,13 +15,14 @@ namespace ListDownloader
 		// Размер буфера, порция, которыми качаем
 		public int mBufferSize { get; private set; } = 16 * 1024;
 
-		public Downloader(string url, string filepath, int num, bool is_numerate_files )
+		public Downloader( string url, string filepath, int num, bool is_numerate_files, object extra_data )
 		{
 			mInfo = new DownloadInfo( filepath );
 			mInfo.mDownloadStatus = DownloadStatus.NotStarted;
 			mInfo.mUrl = url;
 			mInfo.mNumber = num;
 			mInfo.mIsNumerate = is_numerate_files;
+			mInfo.mExtraData = extra_data;
 		}
 
 		/// <summary>

@@ -13,24 +13,16 @@ namespace ListDownloader
 		// Синхронные качатели, будут удаляться при завершении закачки
 		List<Downloader> mDownloaders = new List<Downloader>();
 
-		// Папка, куда сохраняем файлы
-		string mFolderPath;
+		Options mOptions;
 
-		// Сколько файлов качаем одновременно
-		int mMaxParallel;
+		// Событие, вызываемое после успешной закачки файла
+		public event Action<LinkInfo> OnSuccessDownload;
 
-		// Слип между обновлениями статистики
-		int mSleepMsec;
-
-		// Нумеровать ли файлы
-		bool mIsNumerateFiles;
-
-		public ParallelDownloader( string folder_path, int max_parallel, int sleep_msec, bool is_numerate )
+		public ParallelDownloader( Options options )
 		{
-			mFolderPath = folder_path;
-			mMaxParallel = max_parallel;
-			mSleepMsec = sleep_msec;
-			mIsNumerateFiles = is_numerate;
+			if( options == null )
+				throw new NullReferenceException( "options" );
+			mOptions = options;
 		}
 
 		/// <summary>
@@ -39,16 +31,10 @@ namespace ListDownloader
 		public void Add( List<LinkInfo> links )
 		{
 			foreach( var link in links )
-				Add( link );
-		}
-
-		/// <summary>
-		/// Добавить линк
-		/// </summary>
-		public void Add( LinkInfo link )
-		{
-			string tmp_file_path = Helpers.GetFilePath( mFolderPath, link.mCaption, ".tmp" );
-			mDownloaders.Add( new Downloader( link.mUrl, tmp_file_path, mDownloaders.Count() + 1, mIsNumerateFiles ) );
+			{
+				string tmp_file_path = Helpers.GetFilePath( mOptions.FolderPath, link.mCaption, ".tmp" );
+				mDownloaders.Add( new Downloader( link.mUrl, tmp_file_path, mDownloaders.Count() + 1, mOptions.IsNumerateFiles, link ) );
+			}
 		}
 
 		/// <summary>
@@ -72,13 +58,26 @@ namespace ListDownloader
 					{
 						Downloader downloader = mDownloaders[i];
 						DownloadInfo info = downloader.GetInfo();
-						if( !info.IsStarted() && count_current < mMaxParallel )
+						if( !info.IsStarted() && count_current < mOptions.MaxParallel )
 						{
 							downloader.DownloadAsync();
 							++count_current;
 						}
 						else if( info.IsFinished() )
 						{
+							if( info.mError == "" )
+							{
+								try
+								{
+									OnSuccessDownload?.Invoke( info.mExtraData as LinkInfo );
+								}
+								catch( Exception ex )
+								{
+									info.mError = ex.Message;
+								}
+							}
+
+
 							view.UpdateInfo( info );
 
 							if( info.mError == "" )
@@ -99,7 +98,7 @@ namespace ListDownloader
 						}
 					}
 
-					Thread.Sleep( mSleepMsec );
+					Thread.Sleep( mOptions.UpdateInfoMsec );
 				}
 			}
 
