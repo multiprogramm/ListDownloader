@@ -98,7 +98,7 @@ namespace ListDownloader
 				throw new OptionsError( "List file is not exists." );
 
 			int args_count = args.Count() - 1;
-			for( int i = 0; i < args_count; ++i )
+			for( int i = 0; i < args_count; )
 				ExtractArg( args, ref i );
 
 			if( FolderPath == "")
