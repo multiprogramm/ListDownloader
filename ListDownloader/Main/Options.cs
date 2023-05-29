@@ -54,9 +54,32 @@ namespace ListDownloader
 		public bool IsDeleteDownloadedLinks { get; private set; } = false;
 		static readonly private string KEY_DELETE_DOWNLOADED_LINKS = "-deletelinks";
 
-		// Удалять ли ссылки из файла-списка после скачки
+		// Не ждать в конце ввод символа
 		public bool IsReadKey { get; private set; } = true;
 		static readonly private string KEY_NO_READ_KEY = "-noreadkey";
+
+		// Перемещать URL-аутентификацию в http-хедер 
+		// Authorization как Basic-аутентификацию
+		// Т.е. был у нас URL:
+		// https://username:password@example.com/arch.zip
+		// А станет URL:
+		// https://example.com/arch.zip
+		// С хедером
+		// Authorization=Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+		public bool IsMoveUrlAuthToBasicHttpAuth { get; private set; } = false;
+		static readonly private string KEY_MOVE_URL_AUTH_TO_BASIC_HTTP_AUTH = "-MoveUrlAuthToBasicHttpAuth";
+
+		// Копировать URL-аутентификацию в http-хедер
+		// Authorization как Basic-аутентификацию
+		// Т.е. был у нас URL:
+		// https://username:password@example.com/arch.zip
+		// И он останется тем же самым:
+		// https://username:password@example.com/arch.zip
+		// Но дополнительно к запросу добавится хедер
+		// Authorization=Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+		public bool IsCopyUrlAuthToBasicHttpAuth { get; private set; } = false;
+		static readonly private string KEY_COPY_URL_AUTH_TO_BASIC_HTTP_AUTH = "-CopyUrlAuthToBasicHttpAuth";
+
 
 		static readonly private string[] KEYS_HELP = new string[] { "-help", "/help", "/?" };
 
@@ -131,6 +154,28 @@ namespace ListDownloader
 			Console.WriteLine( "    Не ждать в конце ввод символа." );
 			Console.WriteLine( "    По умолчанию ждётся." );
 
+			Console.WriteLine( "  " + KEY_MOVE_URL_AUTH_TO_BASIC_HTTP_AUTH );
+			Console.WriteLine( "    Перемещать URL-аутентификацию в http-хедер Authorization как Basic-аутентификацию." );
+			Console.WriteLine( "        Т.е. был у нас URL:" );
+			Console.WriteLine( "        https://username:password@example.com/arch.zip" );
+			Console.WriteLine( "        А станет URL:" );
+			Console.WriteLine( "        https://example.com/arch.zip" );
+			Console.WriteLine( "        С хедером:" );
+			Console.WriteLine( "        Authorization=Basic dXNlcm5hbWU6cGFzc3dvcmQ=" );
+			Console.WriteLine( "    По умолчанию выключено." );
+			Console.WriteLine( "    Использовать URL-аутентификацию в нешифрованных протоколах (http без s, например) опасно! Ваши логин и пароль передаются простым текстом!" );
+
+			Console.WriteLine( "  " + KEY_COPY_URL_AUTH_TO_BASIC_HTTP_AUTH );
+			Console.WriteLine( "    Копировать URL-аутентификацию в http-хедер Authorization как Basic-аутентификацию." );
+			Console.WriteLine( "        Т.е. был у нас URL:" );
+			Console.WriteLine( "        https://username:password@example.com/arch.zip" );
+			Console.WriteLine( "        И он останется как есть:" );
+			Console.WriteLine( "        https://username:password@example.com/arch.zip" );
+			Console.WriteLine( "        Но добавится хедер:" );
+			Console.WriteLine( "        Authorization=Basic dXNlcm5hbWU6cGFzc3dvcmQ=" );
+			Console.WriteLine( "    По умолчанию выключено." );
+			Console.WriteLine( "    Использовать URL-аутентификацию в нешифрованных протоколах (http без s, например) опасно! Ваши логин и пароль передаются простым текстом!" );
+
 			Console.WriteLine( "  " + KEYS_HELP[0] );
 			Console.WriteLine( "    Справка по параметрам." );
 		}
@@ -181,6 +226,14 @@ namespace ListDownloader
 			else if( s_key == KEY_NO_READ_KEY )
 			{
 				IsReadKey = false;
+			}
+			else if( s_key == KEY_MOVE_URL_AUTH_TO_BASIC_HTTP_AUTH )
+			{
+				IsMoveUrlAuthToBasicHttpAuth = true;
+			}
+			else if( s_key == KEY_COPY_URL_AUTH_TO_BASIC_HTTP_AUTH )
+			{
+				IsCopyUrlAuthToBasicHttpAuth = true;
 			}
 			else
 			{

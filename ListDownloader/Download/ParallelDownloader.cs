@@ -33,7 +33,16 @@ namespace ListDownloader
 			foreach( var link in links )
 			{
 				string tmp_file_path = Helpers.GetFilePath( mOptions.FolderPath, link.mCaption, ".tmp" );
-				mDownloaders.Add( new Downloader( link.mUrl, tmp_file_path, mDownloaders.Count() + 1, mOptions.IsNumerateFiles, link ) );
+				mDownloaders.Add( new Downloader(
+					link.mUrl,
+					tmp_file_path,
+					mDownloaders.Count() + 1,
+					mOptions.IsNumerateFiles,
+					
+					mOptions.IsMoveUrlAuthToBasicHttpAuth,
+					mOptions.IsCopyUrlAuthToBasicHttpAuth,
+
+					link ) );
 			}
 		}
 

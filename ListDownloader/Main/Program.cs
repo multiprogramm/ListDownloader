@@ -17,6 +17,7 @@ namespace ListDownloader
 		static int Main( string[] args )
 		{
 			int result = 0;
+			bool is_read_key = true;
 			try
 			{
 				ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3
@@ -26,6 +27,7 @@ namespace ListDownloader
 
 				// Заполняем опции
 				Options options = new Options( args );
+				is_read_key = options.IsReadKey;
 
 				// Получаем кучу линков и валидируем их
 				IListLinksFormat list_format = LinksTools.CreateListLinksFormat( options.ListFilePath, options.Encoding );
@@ -48,9 +50,6 @@ namespace ListDownloader
 				}
 
 				downloader.Run();
-
-				if( options.IsReadKey )
-					Console.ReadKey();
 			}
 			catch( LogicError error )
 			{
@@ -65,6 +64,8 @@ namespace ListDownloader
 				result = 0;
 			}
 
+			if( is_read_key )
+				Console.ReadKey();
 			return result;
 		}
 

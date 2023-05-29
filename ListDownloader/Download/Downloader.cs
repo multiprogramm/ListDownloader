@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Text;
 
 namespace ListDownloader
 {
@@ -15,13 +16,15 @@ namespace ListDownloader
 		// Размер буфера, порция, которыми качаем
 		public int mBufferSize { get; private set; } = 16 * 1024;
 
-		public Downloader( string url, string filepath, int num, bool is_numerate_files, object extra_data )
+		public Downloader( string url, string filepath, int num, bool is_numerate_files, bool is_move_auth, bool is_copy_auth, object extra_data )
 		{
 			mInfo = new DownloadInfo( filepath );
 			mInfo.mDownloadStatus = DownloadStatus.NotStarted;
 			mInfo.mUrl = url;
 			mInfo.mNumber = num;
 			mInfo.mIsNumerate = is_numerate_files;
+			mInfo.mIsMoveUrlAuthToBasicHttpAuth = is_move_auth;
+			mInfo.mIsCopyUrlAuthToBasicHttpAuth = is_copy_auth;
 			mInfo.mExtraData = extra_data;
 		}
 
@@ -105,8 +108,28 @@ namespace ListDownloader
 		/// </summary>
 		void DownloadSafe()
 		{
-			string url = new Uri( mInfo.mUrl ).AbsoluteUri;
-			WebRequest request = WebRequest.Create( url );
+			Uri uri = new Uri( mInfo.mUrl );
+			WebRequest request = null;
+			bool auth_manipulation = mInfo.mIsMoveUrlAuthToBasicHttpAuth || mInfo.mIsCopyUrlAuthToBasicHttpAuth;
+			if( string.IsNullOrEmpty( uri.UserInfo ) || !auth_manipulation )
+				request = WebRequest.Create( uri.AbsoluteUri );
+			else
+			{
+				string authorization = "Basic " + Convert.ToBase64String( Encoding.Default.GetBytes( uri.UserInfo ) );
+				if( mInfo.mIsMoveUrlAuthToBasicHttpAuth )
+				{
+					// Заменяем URI, удаляя логин/пароль, нас же просили переместить в хедер
+					UriBuilder uri_builder = new UriBuilder( mInfo.mUrl );
+					uri_builder.UserName = "";
+					uri_builder.Password = "";
+					uri = new Uri( uri_builder.ToString() );
+				}
+				
+				request = WebRequest.Create( uri.AbsoluteUri );
+				request.PreAuthenticate = true;
+				request.Headers["Authorization"] = authorization;
+			}
+
 			using( WebResponse response = request.GetResponse() )
 			{
 				string filePathAfterLoad = ResultPathCalc( response );

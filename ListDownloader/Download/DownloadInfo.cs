@@ -49,6 +49,10 @@ namespace ListDownloader
 		// а вот там уже добавится номер, если нужно
 		string mFilePath { get; set; }
 
+		// Копирование/перемещение аутентификации из URL в
+		// хедер, см. в Options
+		public bool mIsMoveUrlAuthToBasicHttpAuth { get; set; } = false;
+		public bool mIsCopyUrlAuthToBasicHttpAuth { get; set; } = false;
 
 		public DownloadInfo( string file_path )
 		{
