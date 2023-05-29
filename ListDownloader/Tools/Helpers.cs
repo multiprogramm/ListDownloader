@@ -19,7 +19,7 @@ namespace ListDownloader
 			double d_bytes = bytes;
 			for( i = 0; i < suffixes.Length && bytes >= 1024; i++, bytes /= 1024 )
 				d_bytes = bytes / 1024.0;
-			return string.Format( "{0:0.##} {1}", d_bytes, suffixes[i] );
+			return string.Format( "{0:0.00} {1}", d_bytes, suffixes[i] );
 		}
 
 		/// <summary>
