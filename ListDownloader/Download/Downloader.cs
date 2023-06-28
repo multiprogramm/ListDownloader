@@ -142,7 +142,7 @@ namespace ListDownloader
 				using( var responseStream = response.GetResponseStream() )
 				{
 					mInfo.mBytes = response.ContentLength;
-					bool isCanSeek = responseStream.CanSeek;
+					bool isCanSeek = responseStream.CanSeek && mInfo.mBytes != -1;
 
 					using( var outputFileStream = GetFileStream( isCanSeek ) )
 					{
@@ -150,9 +150,11 @@ namespace ListDownloader
 							responseStream.Seek( mInfo.mDownloadedBytes, SeekOrigin.Begin );
 
 						var buffer = new byte[mBufferSize];
-						while( mInfo.mDownloadedBytes < mInfo.mBytes )
+						while( mInfo.mDownloadedBytes < mInfo.mBytes || mInfo.mBytes == -1 )
 						{
 							int bytesRead = responseStream.Read( buffer, 0, mBufferSize );
+							if( bytesRead <= 0 && mInfo.mBytes == -1 )
+								break;
 							outputFileStream.Write( buffer, 0, bytesRead );
 							mInfo.mDownloadedBytes += bytesRead;
 						}
