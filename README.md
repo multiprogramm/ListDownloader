@@ -91,6 +91,7 @@ ListDownloader.exe [Attributes] "PathToLinksFile"
 Возможные значения этого ключа можно посмотреть [вот тут](https://docs.microsoft.com/en-us/dotnet/api/system.text.encoding?view=netframework-4.5.2#list-of-encodings) в столбце «Name». И нужно, чтобы в столбце «.NET Framework support» стояла галочка, либо кодировка дополнительно поддерживалась ОС.
 
 
+
 #### -timeupd *NUM*
 Пауза в миллисекундах между обновлениями консоли.
 
@@ -102,6 +103,46 @@ ListDownloader.exe [Attributes] "PathToLinksFile"
 Папка, в которую будут сохраняться файлы.
 
 По умолчанию: папка рядом с файлом со ссылками, с таким же именем.
+
+
+
+#### -deletelinks
+Удалять ссылки из файла-списка после скачки.
+
+По умолчанию: ничего не удаляется.
+
+
+
+#### -noreadkey
+Не ждать в конце ввод символа.
+
+По умолчанию: ждётся.
+
+
+
+#### -MoveUrlAuthToBasicHttpAuth
+Перемещать URL-аутентификацию в http-хедер Authorization как Basic-аутентификацию. Т.е. был у нас URL:
+https://username:password@example.com/arch.zip
+А станет URL:
+https://example.com/arch.zip
+С хедером:
+Authorization=Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+Использовать URL-аутентификацию в нешифрованных протоколах (http без s, например) опасно! Ваши логин и пароль передаются простым текстом!
+
+По умолчанию: выключено.
+
+
+
+#### -CopyUrlAuthToBasicHttpAuth
+Копировать URL-аутентификацию в http-хедер Authorization как Basic-аутентификацию. Т.е. был у нас URL:
+https://username:password@example.com/arch.zip
+И он останется как есть:
+https://username:password@example.com/arch.zip
+Но добавится хедер:
+Authorization=Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+Использовать URL-аутентификацию в нешифрованных протоколах (http без s, например) опасно! Ваши логин и пароль передаются простым текстом!
+
+По умолчанию: выключено.
 
 
 
