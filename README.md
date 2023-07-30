@@ -72,16 +72,17 @@ ListDownloader.exe [Attributes] "PathToLinksFile"
 
 #### -threads *NUM*
 Количество одновременно качаемых файлов.
-
+    
 По умолчанию: 2.
 
-
+---
 
 #### -num
 У результирующих файлов в имени будет добавлен префикс-номер.
 
 По умолчанию: выключено.
 
+---
 
 
 #### -encoding *ENCODING*
@@ -90,6 +91,7 @@ ListDownloader.exe [Attributes] "PathToLinksFile"
 По умолчанию: **utf-8**.
 Возможные значения этого ключа можно посмотреть [вот тут](https://docs.microsoft.com/en-us/dotnet/api/system.text.encoding?view=netframework-4.5.2#list-of-encodings) в столбце «Name». И нужно, чтобы в столбце «.NET Framework support» стояла галочка, либо кодировка дополнительно поддерживалась ОС.
 
+---
 
 
 #### -timeupd *NUM*
@@ -97,6 +99,7 @@ ListDownloader.exe [Attributes] "PathToLinksFile"
 
 По умолчанию: 200.
 
+---
 
 
 #### -dir "*PATH_TO_DIR*"
@@ -104,6 +107,7 @@ ListDownloader.exe [Attributes] "PathToLinksFile"
 
 По умолчанию: папка рядом с файлом со ссылками, с таким же именем.
 
+---
 
 
 #### -deletelinks
@@ -111,6 +115,7 @@ ListDownloader.exe [Attributes] "PathToLinksFile"
 
 По умолчанию: ничего не удаляется.
 
+---
 
 
 #### -noreadkey
@@ -118,33 +123,50 @@ ListDownloader.exe [Attributes] "PathToLinksFile"
 
 По умолчанию: ждётся.
 
+---
 
 
 #### -MoveUrlAuthToBasicHttpAuth
 Перемещать URL-аутентификацию в http-хедер Authorization как Basic-аутентификацию. Т.е. был у нас URL:
+
 https://username:password@example.com/arch.zip
+
 А станет URL:
+
 https://example.com/arch.zip
+
 С хедером:
+
 Authorization=Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+
 Использовать URL-аутентификацию в нешифрованных протоколах (http без s, например) опасно! Ваши логин и пароль передаются простым текстом!
 
 По умолчанию: выключено.
 
+---
 
 
 #### -CopyUrlAuthToBasicHttpAuth
 Копировать URL-аутентификацию в http-хедер Authorization как Basic-аутентификацию. Т.е. был у нас URL:
+
 https://username:password@example.com/arch.zip
+
 И он останется как есть:
+
 https://username:password@example.com/arch.zip
+
 Но добавится хедер:
+
 Authorization=Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+
 Использовать URL-аутентификацию в нешифрованных протоколах (http без s, например) опасно! Ваши логин и пароль передаются простым текстом!
 
 По умолчанию: выключено.
 
+---
 
 
 #### -help
 Показать справку по параметрам
+
+---
