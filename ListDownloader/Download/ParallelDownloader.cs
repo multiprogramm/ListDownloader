@@ -12,6 +12,7 @@ namespace ListDownloader
 	{
 		// Синхронные качатели, будут удаляться при завершении закачки
 		List<Downloader> mDownloaders = new List<Downloader>();
+		Random mRandom = new Random();
 
 		Options mOptions;
 
@@ -33,16 +34,17 @@ namespace ListDownloader
 			foreach( var link in links )
 			{
 				string tmp_file_path = Helpers.GetFilePath( mOptions.FolderPath, link.mCaption, ".tmp" );
-				mDownloaders.Add( new Downloader(
-					link.mUrl,
-					tmp_file_path,
-					mDownloaders.Count() + 1,
-					mOptions.IsNumerateFiles,
-					
-					mOptions.IsMoveUrlAuthToBasicHttpAuth,
-					mOptions.IsCopyUrlAuthToBasicHttpAuth,
+				DownloadInfo info = new DownloadInfo( tmp_file_path );
+				info.mUrl = link.mUrl;
+				info.mNumber = mDownloaders.Count() + 1;
+				info.mIsNumerate = mOptions.IsNumerateFiles;
+				info.mIsMoveUrlAuthToBasicHttpAuth = mOptions.IsMoveUrlAuthToBasicHttpAuth;
+				info.mIsCopyUrlAuthToBasicHttpAuth = mOptions.IsCopyUrlAuthToBasicHttpAuth;
+				info.mExtraData = link;
+				info.mPauseMsec = calculatePause();
+				info.mHeaders = mOptions.Headers;
 
-					link ) );
+				mDownloaders.Add( new Downloader( info ) );
 			}
 		}
 
@@ -101,7 +103,7 @@ namespace ListDownloader
 
 							continue;
 						}
-						else if( info.mDownloadStatus == DownloadStatus.Started )
+						else if( info.mDownloadStatus == DownloadStatus.Started || info.mDownloadStatus == DownloadStatus.Paused )
 						{
 							view.UpdateInfo( info );
 						}
@@ -113,6 +115,22 @@ namespace ListDownloader
 
 			Console.WriteLine( "Downloaded: {0}, Error: {1}",
 				ok_count, error_count );
+		}
+
+		private int calculatePause()
+		{
+			if( mOptions.MinPauseMsec.HasValue && mOptions.MaxPauseMsec.HasValue )
+			{
+				if( mOptions.MinPauseMsec.Value < mOptions.MaxPauseMsec )
+					return mRandom.Next( mOptions.MinPauseMsec.Value, mOptions.MaxPauseMsec.Value + 1 );
+				return mOptions.MinPauseMsec.Value;
+			}
+			else if( mOptions.MinPauseMsec.HasValue )
+				return mOptions.MinPauseMsec.Value;
+			else if( mOptions.MaxPauseMsec.HasValue )
+				return mOptions.MaxPauseMsec.Value;
+
+			return 0;
 		}
 	}
 }

@@ -84,17 +84,33 @@ namespace ListDownloader
 
 				colorForProgress = ConsoleColor.DarkGray;
 			}
+			else if( info.mDownloadStatus == DownloadStatus.Paused )
+			{
+				string left = info.mPauseMsec.ToString() + "ms";
+				string center = " ";
+				string right = "";
+
+				if( info.mError != "" )
+				{
+					right = getErrorString( info );
+					colorForProgress = ConsoleColor.DarkRed;
+				}
+				else
+				{
+					right = Helpers.FormatBytes( info.mBytes );
+					colorForProgress = ConsoleColor.DarkGreen;
+				}
+
+				progress_string = ProgressStringAligner( left, center, right, progressStringSize );
+				count_progress_symbols = calcProgressSymbols( 1, 1, progress_string.Count() );
+			}
 			else if( info.mDownloadStatus == DownloadStatus.Finished )
 			{
 				if( info.mError != "" )
 				{
-					string str_in_prog;
-					if( info.mHttpErrorCode != 0 )
-						str_in_prog = info.mHttpErrorCode.ToString();
-					else
-						str_in_prog = "ERROR";
+					string center = getErrorString( info );
 					colorForProgress = ConsoleColor.DarkRed;
-					progress_string = ProgressStringAligner( str_in_prog, progressStringSize );
+					progress_string = ProgressStringAligner( center, progressStringSize );
 				}
 				else
 				{
@@ -169,6 +185,18 @@ namespace ListDownloader
 			if( maxProgress != 0 )
 				count_progress_symbols = (int)( (double)currentProgress / (double)maxProgress * (double)norm );
 			return count_progress_symbols;
+		}
+
+		string getErrorString( DownloadInfo info )
+		{
+			if( info.mError != "" )
+			{
+				if( info.mHttpErrorCode != 0 )
+					return info.mHttpErrorCode.ToString();
+				return "ERROR";
+			}
+
+			return "";
 		}
 	}
 }

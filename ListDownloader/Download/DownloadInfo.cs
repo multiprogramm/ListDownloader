@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace ListDownloader
 {
@@ -9,6 +10,7 @@ namespace ListDownloader
 	{
 		NotStarted, // Не начиналась
 		Started, // Запущена
+		Paused, // Пауза
 		Finished // Завершена (успешно или с ошибкой)
 	}
 
@@ -44,6 +46,12 @@ namespace ListDownloader
 
 		// Любые дополнительные данные, связанные с закачкой
 		public object mExtraData { get; set; } = null;
+
+		// Пауза после завершения запроса
+		public int mPauseMsec { get; set; } = 0;
+
+		// Заголовки для запроса
+		public Dictionary<string, string> mHeaders { get; set; } = null;
 
 		// Путь к файлу (без номера), получается через GetFilePath()
 		// а вот там уже добавится номер, если нужно

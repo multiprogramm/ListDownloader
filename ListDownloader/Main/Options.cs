@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -80,6 +81,22 @@ namespace ListDownloader
 		public bool IsCopyUrlAuthToBasicHttpAuth { get; private set; } = false;
 		static readonly private string KEY_COPY_URL_AUTH_TO_BASIC_HTTP_AUTH = "-CopyUrlAuthToBasicHttpAuth";
 
+		// Минимальная пауза после скачивания
+		public int? MinPauseMsec { get; private set; } = DEFAULT_MIN_PAUSE_MSEC;
+		static readonly private string KEY_MIN_PAUSE_MSEC = "-minPause";
+		static readonly private int? DEFAULT_MIN_PAUSE_MSEC = null;
+
+		// Максимальная пауза после скачивания
+		public int? MaxPauseMsec { get; private set; } = DEFAULT_MAX_PAUSE_MSEC;
+		static readonly private string KEY_MAX_PAUSE_MSEC = "-maxPause";
+		static readonly private int? DEFAULT_MAX_PAUSE_MSEC = null;
+
+		// Путь к файлу с заголовками, utf-8
+		public string HeadersFilePath { get; private set; } = DEFAULT_HEADERS_FILE_PATH;
+		static readonly private string KEY_HEADERS_FILE_PATH = "-headersFile";
+		static readonly private string DEFAULT_HEADERS_FILE_PATH = "";
+
+		public Dictionary<string, string> Headers { get; private set; } = new Dictionary<string, string>();
 
 		static readonly private string[] KEYS_HELP = new string[] { "-help", "/help", "/?" };
 
@@ -109,6 +126,23 @@ namespace ListDownloader
 				);
 				if( !Directory.Exists( FolderPath ) )
 					Directory.CreateDirectory( FolderPath );
+			}
+
+			if( MinPauseMsec.HasValue && MaxPauseMsec.HasValue )
+			{
+				if( MinPauseMsec.Value > MaxPauseMsec.Value )
+				{
+					int temp = MinPauseMsec.Value;
+					MinPauseMsec = MaxPauseMsec;
+					MaxPauseMsec = temp;
+				}
+			}
+
+			if( HeadersFilePath != "" )
+			{
+				if( !File.Exists( HeadersFilePath ) )
+					throw new OptionsError( "List file is not exists." );
+				FillHeaders();
 			}
 		}
 
@@ -176,6 +210,18 @@ namespace ListDownloader
 			Console.WriteLine( "    По умолчанию выключено." );
 			Console.WriteLine( "    Использовать URL-аутентификацию в нешифрованных протоколах (http без s, например) опасно! Ваши логин и пароль передаются простым текстом!" );
 
+			Console.WriteLine( "  " + KEY_MIN_PAUSE_MSEC );
+			Console.WriteLine( "    Минимальная пауза в миллисекундах после скачки файла у потока." );
+			Console.WriteLine( "    По умолчанию нет." );
+
+			Console.WriteLine( "  " + KEY_MAX_PAUSE_MSEC );
+			Console.WriteLine( "    Максимальная пауза в миллисекундах после скачки файла у потока." );
+			Console.WriteLine( "    По умолчанию нет." );
+
+			Console.WriteLine( "  " + KEY_HEADERS_FILE_PATH );
+			Console.WriteLine( "    Путь к файлу заголовков, которые будут подставляться в запрос." );
+			Console.WriteLine( "    По умолчанию нет." );
+
 			Console.WriteLine( "  " + KEYS_HELP[0] );
 			Console.WriteLine( "    Справка по параметрам." );
 		}
@@ -235,6 +281,20 @@ namespace ListDownloader
 			{
 				IsCopyUrlAuthToBasicHttpAuth = true;
 			}
+			else if( s_key == KEY_MIN_PAUSE_MSEC )
+			{
+				string s_value = args[i++];
+				MinPauseMsec = ExtractPositiveInt( s_key, s_value );
+			}
+			else if( s_key == KEY_MAX_PAUSE_MSEC )
+			{
+				string s_value = args[i++];
+				MaxPauseMsec = ExtractPositiveInt( s_key, s_value );
+			}
+			else if( s_key == KEY_HEADERS_FILE_PATH )
+			{
+				HeadersFilePath = args[i++];
+			}
 			else
 			{
 				throw new OptionsError( "Unknown key '" + s_key + "'" );
@@ -252,6 +312,22 @@ namespace ListDownloader
 			if( result <= 0 )
 				throw new OptionsError( "Value of key " + s_key + " '" + s_value.ToString() + "' must be > 0." );
 			return result;
+		}
+
+		void FillHeaders()
+		{
+			var lines = File.ReadAllLines( HeadersFilePath );
+			foreach( var line in lines )
+			{
+				if( line == "" )
+					continue;
+				int eq_idx = line.IndexOf( '=' );
+				if( eq_idx <= 0 )
+					continue;
+				string param = line.Substring( 0, eq_idx );
+				string value = line.Substring( eq_idx + 1 );
+				Headers[param] = value;
+			}
 		}
 	}
 }

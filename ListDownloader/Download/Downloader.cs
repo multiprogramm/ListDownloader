@@ -16,16 +16,10 @@ namespace ListDownloader
 		// Размер буфера, порция, которыми качаем
 		public int mBufferSize { get; private set; } = 16 * 1024;
 
-		public Downloader( string url, string filepath, int num, bool is_numerate_files, bool is_move_auth, bool is_copy_auth, object extra_data )
+		public Downloader( DownloadInfo info )
 		{
-			mInfo = new DownloadInfo( filepath );
+			mInfo = info;
 			mInfo.mDownloadStatus = DownloadStatus.NotStarted;
-			mInfo.mUrl = url;
-			mInfo.mNumber = num;
-			mInfo.mIsNumerate = is_numerate_files;
-			mInfo.mIsMoveUrlAuthToBasicHttpAuth = is_move_auth;
-			mInfo.mIsCopyUrlAuthToBasicHttpAuth = is_copy_auth;
-			mInfo.mExtraData = extra_data;
 		}
 
 		/// <summary>
@@ -100,6 +94,19 @@ namespace ListDownloader
 			}
 
 			mInfo.mBytes = mInfo.mDownloadedBytes;
+			mInfo.mDownloadStatus = DownloadStatus.Paused;
+
+			// Pause
+			{
+				DateTime startPause = DateTime.Now;
+				int pauseTotal = mInfo.mPauseMsec;
+				while( mInfo.mPauseMsec > 0 )
+				{
+					System.Threading.Thread.Sleep( 200 );
+					mInfo.mPauseMsec = Math.Max( 0, pauseTotal - (int)( DateTime.Now - startPause ).TotalMilliseconds );
+				}
+			}
+
 			mInfo.mDownloadStatus = DownloadStatus.Finished;
 		}
 
@@ -110,12 +117,15 @@ namespace ListDownloader
 		{
 			Uri uri = new Uri( mInfo.mUrl );
 			WebRequest request = null;
+
+			// Манипуляции с копированием/перемещением авторизации из параметров запроса в заголовки
+			string authorization = null;
 			bool auth_manipulation = mInfo.mIsMoveUrlAuthToBasicHttpAuth || mInfo.mIsCopyUrlAuthToBasicHttpAuth;
 			if( string.IsNullOrEmpty( uri.UserInfo ) || !auth_manipulation )
 				request = WebRequest.Create( uri.AbsoluteUri );
 			else
 			{
-				string authorization = "Basic " + Convert.ToBase64String( Encoding.Default.GetBytes( uri.UserInfo ) );
+				authorization = "Basic " + Convert.ToBase64String( Encoding.Default.GetBytes( uri.UserInfo ) );
 				if( mInfo.mIsMoveUrlAuthToBasicHttpAuth )
 				{
 					// Заменяем URI, удаляя логин/пароль, нас же просили переместить в хедер
@@ -127,6 +137,15 @@ namespace ListDownloader
 				
 				request = WebRequest.Create( uri.AbsoluteUri );
 				request.PreAuthenticate = true;
+			}
+
+			// Выставляем заголовки
+			FillHeaders( request );
+
+			// Дополнительно выставляем авторизацию с перезаписью,
+			// если с ней были манипуляции
+			if( authorization != null )
+			{
 				request.Headers["Authorization"] = authorization;
 			}
 
@@ -162,6 +181,63 @@ namespace ListDownloader
 				}
 
 				File.Move( mInfo.GetFilePath(), filePathAfterLoad );
+			}
+		}
+
+		void FillHeaders( WebRequest request )
+		{
+			if( mInfo.mHeaders == null )
+				return;
+
+			foreach( var header in mInfo.mHeaders )
+			{
+				if( request is HttpWebRequest )
+					FillHeader( request as HttpWebRequest, header.Key, header.Value );
+				else
+					request.Headers[header.Key] = header.Value;
+			}
+		}
+
+		void FillHeader( HttpWebRequest request, string key, string value )
+		{
+			switch( key )
+			{
+				case "Accept":
+					request.Accept = value;
+					break;
+				case "Connection":
+					request.Connection = value;
+					break;
+				case "Content-Type":
+					request.ContentType = value;
+					break;
+				case "Expect":
+					request.Expect = value;
+					break;
+				case "Date":
+					request.Date = DateTime.Parse( value );
+					break;
+				case "Transfer-Encoding":
+					request.TransferEncoding = value;
+					break;
+				case "If-Modified-Since":
+					request.IfModifiedSince = DateTime.Parse( value );
+					break;
+				case "Referer":
+					request.Referer = value;
+					break;
+				case "User-Agent":
+					request.UserAgent = value;
+					break;
+
+				case "Content-Length":
+				case "Host":
+				case "Keep-Alive":
+					break;
+
+				default:
+					request.Headers[key] = value;
+					break;
 			}
 		}
 
